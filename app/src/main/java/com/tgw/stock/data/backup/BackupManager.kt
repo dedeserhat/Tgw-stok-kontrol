@@ -13,9 +13,17 @@ sealed class BackupResult {
 }
 
 /**
- * Single-file backup/restore for the offline SQLite database. Closing the Room instance
- * before touching the file forces a WAL checkpoint so the on-disk file is self-contained;
- * the DB is reopened lazily by AppContainer on next access.
+ * Single-file backup/restore for the offline SQLite database.
+ *
+ * Backup keeps the live Room instance open: it forces a WAL checkpoint with a raw
+ * PRAGMA (flushing pending writes into the main .db file) and then copies that file,
+ * so the rest of the app keeps working normally right after a backup.
+ *
+ * Restore is different - it replaces the .db file on disk, so the live Room instance
+ * (and every DAO/repository built on top of it) would otherwise keep querying a
+ * database object that no longer matches what's on disk. It closes the singleton and
+ * relies on the caller to reinitialize the app container / restart the app before
+ * touching the database again (see SettingsScreen's restart prompt).
  */
 class BackupManager(private val context: Context) {
 
@@ -23,9 +31,9 @@ class BackupManager(private val context: Context) {
 
     suspend fun backupTo(destination: Uri): BackupResult = withContext(Dispatchers.IO) {
         try {
-            AppDatabase.closeInstance()
             val source = dbFile()
             if (!source.exists()) return@withContext BackupResult.Failure("No database to back up yet")
+            AppDatabase.getInstance(context).query("PRAGMA wal_checkpoint(FULL)", null).use { it.moveToFirst() }
             context.contentResolver.openOutputStream(destination)?.use { out ->
                 source.inputStream().use { input -> input.copyTo(out) }
             } ?: return@withContext BackupResult.Failure("Could not open destination file")

@@ -62,7 +62,7 @@ class CsvExporter(
 
     private suspend fun exportProducts(): File {
         val categories = categoryDao.getAll().associateBy { it.id }
-        val rows = productDao.getAll().map { p ->
+        val rows = productDao.getAllIncludingArchived().map { p ->
             listOf(
                 p.id, p.name, categories[p.categoryId]?.name ?: "", p.unit,
                 p.currentStock, p.minStock, p.targetStock,
@@ -90,7 +90,7 @@ class CsvExporter(
     }
 
     private suspend fun exportSupplierPrices(): File {
-        val products = productDao.getAll().associateBy { it.id }
+        val products = productDao.getAllIncludingArchived().associateBy { it.id }
         val suppliers = supplierDao.getAll().associateBy { it.id }
         val rows = mutableListOf<List<Any?>>()
         for (link in supplierProductDao.getAll()) {
@@ -114,7 +114,7 @@ class CsvExporter(
     }
 
     private suspend fun exportRecipes(): File {
-        val products = productDao.getAll().associateBy { it.id }
+        val products = productDao.getAllIncludingArchived().associateBy { it.id }
         val rows = mutableListOf<List<Any?>>()
         for (recipe in recipeDao.getAll()) {
             for (item in recipeItemDao.getForRecipe(recipe.id)) {
@@ -134,7 +134,7 @@ class CsvExporter(
 
     private suspend fun exportPurchaseOrders(): File {
         val suppliers = supplierDao.getAll().associateBy { it.id }
-        val products = productDao.getAll().associateBy { it.id }
+        val products = productDao.getAllIncludingArchived().associateBy { it.id }
         val rows = mutableListOf<List<Any?>>()
         for (order in purchaseOrderDao.getAll()) {
             for (item in purchaseOrderItemDao.getForOrder(order.id)) {
@@ -153,7 +153,7 @@ class CsvExporter(
     }
 
     private suspend fun exportStockMovements(): File {
-        val products = productDao.getAll().associateBy { it.id }
+        val products = productDao.getAllIncludingArchived().associateBy { it.id }
         val rows = movementDao.getAll().map { m ->
             listOf(
                 dateFormat.format(Date(m.createdAt)), products[m.productId]?.name ?: "",
@@ -167,7 +167,7 @@ class CsvExporter(
     }
 
     private suspend fun exportWaste(): File {
-        val products = productDao.getAll().associateBy { it.id }
+        val products = productDao.getAllIncludingArchived().associateBy { it.id }
         val rows = wasteDao.getAll().map { w ->
             listOf(
                 dateFormat.format(Date(w.recordedDate)), products[w.productId]?.name ?: "",

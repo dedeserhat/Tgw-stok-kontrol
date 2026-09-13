@@ -33,7 +33,7 @@ class WasteViewModel(
         viewModelScope.launch {
             products.value = productRepository.getAll()
             wasteRepository.observeAll().collect { records ->
-                val productsById = productRepository.getAll().associateBy { it.id }
+                val productsById = productRepository.getAllIncludingArchived().associateBy { it.id }
                 _rows.value = records.map { r ->
                     val p = productsById[r.productId]
                     WasteRow(p?.name ?: "Unknown", p?.unit ?: "", r.quantity, r.reason, r.totalCostMinor, r.note, r.recordedDate)

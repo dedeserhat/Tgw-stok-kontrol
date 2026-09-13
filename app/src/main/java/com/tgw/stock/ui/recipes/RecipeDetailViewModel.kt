@@ -55,7 +55,7 @@ class RecipeDetailViewModel(
 
     private suspend fun reloadItemsAndSummary() {
         val items = recipeRepository.getItems(recipeId)
-        val productsById = productRepository.getAll().associateBy { it.id }
+        val productsById = productRepository.getAllIncludingArchived().associateBy { it.id }
         _rows.value = items.mapNotNull { item ->
             val product = productsById[item.productId] ?: return@mapNotNull null
             RecipeItemRow(item.id, item.productId, product.name, product.unit, item.quantity)

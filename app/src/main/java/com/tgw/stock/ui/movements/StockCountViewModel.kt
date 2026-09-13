@@ -56,7 +56,7 @@ class StockCountDetailViewModel(
         viewModelScope.launch {
             _count.value = stockCountRepository.getById(countId)
             stockCountRepository.observeItems(countId).collect { items ->
-                val products = productRepository.getAll().associateBy { it.id }
+                val products = productRepository.getAllIncludingArchived().associateBy { it.id }
                 _rows.value = items.map { item ->
                     val product = products[item.productId]
                     StockCountRow(

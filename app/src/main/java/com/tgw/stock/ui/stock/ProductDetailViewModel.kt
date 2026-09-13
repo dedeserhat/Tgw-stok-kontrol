@@ -54,6 +54,6 @@ class ProductDetailViewModel(
     }
 
     suspend fun deleteProduct() {
-        _detail.value?.product?.let { productRepository.delete(it) }
+        productRepository.archive(productId)
     }
 }

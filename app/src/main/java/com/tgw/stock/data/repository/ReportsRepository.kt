@@ -23,13 +23,16 @@ class DefaultReportsRepository(
 ) : ReportsRepository {
 
     override suspend fun getReport(fromMillis: Long, toMillis: Long): ReportsData {
-        val products = productDao.getAll()
-        val productsById = products.associateBy { it.id }
+        val activeProducts = productDao.getAll()
+        // Historical joins (past movements/counts/prices) must still resolve a real name
+        // for a product that has since been archived, so this map includes archived rows -
+        // only currentStockValue below deliberately excludes them.
+        val productsById = productDao.getAllIncludingArchived().associateBy { it.id }
         val suppliersById = supplierDao.getAll().associateBy { it.id }
         val batchesById = batchDao.getAll().associateBy { it.id }
         val movements = movementDao.getBetween(fromMillis, toMillis)
 
-        val currentStockValue = products.sumOf {
+        val currentStockValue = activeProducts.sumOf {
             StockCalculations.stockValue(it.currentStock, it.avgCostPerUnitMinor).cents
         }
 

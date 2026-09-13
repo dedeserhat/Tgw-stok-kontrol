@@ -159,7 +159,7 @@ fun ProductDetailScreen(
     if (showDeleteConfirm) {
         ConfirmDialog(
             title = "Delete product?",
-            message = "This will remove ${detail?.product?.name} and cannot be undone.",
+            message = "${detail?.product?.name} will be removed from stock, recipes and purchasing. Its stock/waste/purchase history is kept for past reports.",
             confirmLabel = "Delete",
             onConfirm = {
                 showDeleteConfirm = false

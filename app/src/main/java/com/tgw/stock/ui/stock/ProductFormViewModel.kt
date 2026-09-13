@@ -25,6 +25,7 @@ data class ProductFormState(
     val nameError: String? = null,
     val minStockError: String? = null,
     val targetStockError: String? = null,
+    val barcodeError: String? = null,
     val isSaving: Boolean = false,
     val isEditMode: Boolean = false,
     val savedProductId: Long? = null
@@ -70,7 +71,7 @@ class ProductFormViewModel(
     fun updateUnit(unit: StockUnit) { _state.value = _state.value.copy(unit = unit) }
     fun updateMinStock(value: String) { _state.value = _state.value.copy(minStock = value, minStockError = null) }
     fun updateTargetStock(value: String) { _state.value = _state.value.copy(targetStock = value, targetStockError = null) }
-    fun updateBarcode(value: String) { _state.value = _state.value.copy(barcode = value) }
+    fun updateBarcode(value: String) { _state.value = _state.value.copy(barcode = value, barcodeError = null) }
     fun updateSupplier(id: Long?) { _state.value = _state.value.copy(preferredSupplierId = id) }
 
     fun save() {
@@ -97,6 +98,22 @@ class ProductFormViewModel(
 
         _state.value = s.copy(isSaving = true)
         viewModelScope.launch {
+            val trimmedBarcode = s.barcode.trim().ifBlank { null }
+            if (trimmedBarcode != null) {
+                // Products.barcode has a DB-level unique index; ProductDao.insert uses
+                // OnConflictStrategy.REPLACE for id-based upserts, which would silently
+                // delete an unrelated product (and cascade its batches/movements/recipe
+                // links) if two products ever shared a barcode. Catch that here instead.
+                val existingWithBarcode = productRepository.getByBarcode(trimmedBarcode)
+                if (existingWithBarcode != null && existingWithBarcode.id != productId) {
+                    _state.value = _state.value.copy(
+                        isSaving = false,
+                        barcodeError = "Already used by \"${existingWithBarcode.name}\""
+                    )
+                    return@launch
+                }
+            }
+
             val existing = productId?.let { productRepository.getById(it) }
             val entity = ProductEntity(
                 id = productId ?: 0,
@@ -110,7 +127,7 @@ class ProductFormViewModel(
                 lastCostPerUnitMinor = existing?.lastCostPerUnitMinor ?: 0,
                 lastPurchaseDate = existing?.lastPurchaseDate,
                 preferredSupplierId = s.preferredSupplierId,
-                barcode = s.barcode.trim().ifBlank { null },
+                barcode = trimmedBarcode,
                 isSample = existing?.isSample ?: false,
                 createdAt = existing?.createdAt ?: System.currentTimeMillis()
             )

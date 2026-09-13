@@ -148,6 +148,8 @@ fun ProductFormScreen(
                 value = state.barcode,
                 onValueChange = viewModel::updateBarcode,
                 label = { Text("Barcode (optional)") },
+                isError = state.barcodeError != null,
+                supportingText = { state.barcodeError?.let { Text(it) } },
                 modifier = Modifier.fillMaxWidth()
             )
 

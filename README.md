@@ -3,13 +3,23 @@
 Android restaurant stock control & purchasing app. Kotlin + Jetpack Compose + Room,
 Material 3, fully offline.
 
-## Building the app
+## Get the APK from GitHub Actions (no Android Studio needed)
+
+Every push builds a debug APK automatically. To download it on your phone:
+
+1. On GitHub, open **Actions** → the latest **Build debug APK** run (green check).
+2. Scroll to **Artifacts** and tap **app-debug.apk** to download it.
+3. Open the downloaded file on your phone to install (allow "install unknown apps" for
+   your browser/files app if asked).
+
+## Building locally in Android Studio
 
 This app was written in an environment with no Android SDK and no access to Google's
-Maven repository (`dl.google.com` is blocked by network policy), so it has **not been
-compiled or turned into an APK here** - the source has been reviewed carefully by hand
-and by a second automated pass, but has not gone through a real Kotlin/Android compiler.
-To build it:
+Maven repository (`dl.google.com` is blocked by network policy), so it could not be
+compiled inside that sandbox - the source was reviewed carefully by hand and by an
+automated pass instead. The GitHub Actions workflow above (`.github/workflows/build-apk.yml`)
+runs a real Gradle build on every push and is the authoritative check that it compiles.
+To build locally instead:
 
 1. Open the project root in Android Studio (Koala/2024.1 or newer recommended).
 2. Let Gradle sync - it will download the Android SDK platform (34), build tools, and

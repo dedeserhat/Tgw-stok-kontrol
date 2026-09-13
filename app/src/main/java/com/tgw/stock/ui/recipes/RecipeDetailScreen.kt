@@ -153,6 +153,13 @@ private fun IngredientDialog(
     var productId by remember { mutableStateOf(initial?.productId) }
     var quantity by remember { mutableStateOf(initial?.quantity?.toString() ?: "") }
     var error by remember { mutableStateOf<String?>(null) }
+    val selectedProductUnit = products.firstOrNull { it.id == productId }?.unit
+        ?.let { com.tgw.stock.domain.StockUnit.fromNameSafe(it) }
+    val smallUnitHint = when (selectedProductUnit) {
+        com.tgw.stock.domain.StockUnit.KG -> "e.g. 150 g is 0.15"
+        com.tgw.stock.domain.StockUnit.L -> "e.g. 150 ml is 0.15"
+        else -> null
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -163,9 +170,9 @@ private fun IngredientDialog(
                 OutlinedTextField(
                     value = quantity,
                     onValueChange = { quantity = it },
-                    label = { Text("Quantity (base unit)") },
+                    label = { Text(if (selectedProductUnit != null) "Quantity (${selectedProductUnit.label})" else "Quantity") },
                     isError = error != null,
-                    supportingText = { error?.let { Text(it) } },
+                    supportingText = { Text(error ?: smallUnitHint ?: " ") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                 )
             }

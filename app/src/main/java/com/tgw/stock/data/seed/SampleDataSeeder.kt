@@ -176,7 +176,7 @@ class SampleDataSeeder(
         receive("Pizza sauce", 6.0, 240, "Balkania", 90)
         receive("Salatalık", 3.0, 130, "Sysco", 7)
         receive("Tuz", 8.0, 32, "Balkania", 365)
-        receive("Mint", 0.2, 800, "Balkania", 14)
+        receive("Mint", 200.0, 1, "Balkania", 14)
         receive("Ayçiçek Yağı", 15.0, 180, "Frylite", 180)
     }
 
@@ -189,15 +189,19 @@ class SampleDataSeeder(
             }
         }
 
-        recipe("Cacık", 499, listOf("Yoğurt" to 150.0, "Salatalık" to 40.0, "Sarımsak" to 5.0, "Tuz" to 2.0, "Mint" to 1.0))
-        recipe("TGW Sauce", 250, listOf("Yoğurt" to 40.0, "Mayonez" to 60.0, "Sarımsak" to 10.0, "Chilli sauce" to 20.0))
-        recipe("Garlic Sauce", 250, listOf("Yoğurt" to 50.0, "Mayonez" to 100.0, "Sarımsak" to 15.0))
-        recipe("Chicken Shish", 999, listOf("Tavuk" to 220.0, "Soğan" to 30.0, "Domates" to 30.0))
-        recipe("Iskender", 1250, listOf("Dana eti" to 200.0, "Pizza sauce" to 50.0, "Yoğurt" to 100.0, "Un" to 100.0))
-        recipe("Kebab Bowl", 1099, listOf("Kuzu eti" to 180.0, "Patates" to 100.0, "Domates" to 50.0, "Soğan" to 30.0))
-        recipe("Chicken Wrap", 799, listOf("Tavuk" to 150.0, "Domates" to 30.0, "Soğan" to 20.0, "Mayonez" to 20.0))
-        recipe("Margherita Pizza", 899, listOf("Un" to 200.0, "Pizza sauce" to 80.0, "Mozzarella" to 150.0))
-        recipe("A La Turca Pizza", 1099, listOf("Un" to 200.0, "Pizza sauce" to 60.0, "Mozzarella" to 100.0, "Dana eti" to 80.0, "Soğan" to 20.0))
+        // RecipeItemEntity.quantity is always in the ingredient's own base unit (see
+        // seedProducts above): kg for everything here except Mint (g) and the two sauces
+        // (L). A "150 g of yoğurt" per-portion amount is therefore 0.15, not 150 - entering
+        // it as 150 would mean 150 kg of yoğurt in one portion.
+        recipe("Cacık", 499, listOf("Yoğurt" to 0.150, "Salatalık" to 0.040, "Sarımsak" to 0.005, "Tuz" to 0.002, "Mint" to 1.0))
+        recipe("TGW Sauce", 250, listOf("Yoğurt" to 0.040, "Mayonez" to 0.060, "Sarımsak" to 0.010, "Chilli sauce" to 0.020))
+        recipe("Garlic Sauce", 250, listOf("Yoğurt" to 0.050, "Mayonez" to 0.100, "Sarımsak" to 0.015))
+        recipe("Chicken Shish", 999, listOf("Tavuk" to 0.220, "Soğan" to 0.030, "Domates" to 0.030))
+        recipe("Iskender", 1250, listOf("Dana eti" to 0.200, "Pizza sauce" to 0.050, "Yoğurt" to 0.100, "Un" to 0.100))
+        recipe("Kebab Bowl", 1099, listOf("Kuzu eti" to 0.180, "Patates" to 0.100, "Domates" to 0.050, "Soğan" to 0.030))
+        recipe("Chicken Wrap", 799, listOf("Tavuk" to 0.150, "Domates" to 0.030, "Soğan" to 0.020, "Mayonez" to 0.020))
+        recipe("Margherita Pizza", 899, listOf("Un" to 0.200, "Pizza sauce" to 0.080, "Mozzarella" to 0.150))
+        recipe("A La Turca Pizza", 1099, listOf("Un" to 0.200, "Pizza sauce" to 0.060, "Mozzarella" to 0.100, "Dana eti" to 0.080, "Soğan" to 0.020))
     }
 
     private suspend fun seedSampleMovementsAndWaste(prod: Map<String, Long>) {

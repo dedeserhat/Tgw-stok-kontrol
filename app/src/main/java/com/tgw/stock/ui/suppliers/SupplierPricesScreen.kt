@@ -67,6 +67,7 @@ fun SupplierPricesScreen(
     if (showAddDialog) {
         AddOfferDialog(
             suppliers = suppliers,
+            productUnit = product?.unit,
             onDismiss = { showAddDialog = false },
             onConfirm = { supplierId, desc, qty, price, date ->
                 viewModel.addOffer(supplierId, desc, qty, price, date)
@@ -115,6 +116,7 @@ private fun OfferCard(
 @Composable
 private fun AddOfferDialog(
     suppliers: List<SupplierEntity>,
+    productUnit: String?,
     onDismiss: () -> Unit,
     onConfirm: (Long, String, Double, Long, Long) -> Unit
 ) {
@@ -124,6 +126,7 @@ private fun AddOfferDialog(
     var packageQuantity by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
+    val unitLabel = productUnit?.let { com.tgw.stock.domain.StockUnit.fromNameSafe(it).label }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -153,7 +156,8 @@ private fun AddOfferDialog(
                 OutlinedTextField(
                     value = packageQuantity,
                     onValueChange = { packageQuantity = it },
-                    label = { Text("Package quantity (base unit)") },
+                    label = { Text(if (unitLabel != null) "Package quantity ($unitLabel)" else "Package quantity") },
+                    supportingText = { Text(if (unitLabel != null) "e.g. a 10 $unitLabel bag is 10" else " ") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth()
                 )

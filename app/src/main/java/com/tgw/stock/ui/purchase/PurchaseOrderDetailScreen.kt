@@ -8,6 +8,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -92,6 +93,7 @@ fun PurchaseOrderDetailScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ReceiveStockDialog(
     rows: List<PurchaseOrderItemRow>,
@@ -99,6 +101,8 @@ private fun ReceiveStockDialog(
     onConfirm: (Map<Long, Double>, Map<Long, Long?>) -> Unit
 ) {
     val quantities = remember { mutableStateMapOf<Long, String>().apply { rows.forEach { put(it.itemId, (it.quantity - it.receivedQuantity).coerceAtLeast(0.0).toString()) } } }
+    val expiryDates = remember { mutableStateMapOf<Long, Long?>() }
+    var datePickerForItemId by remember { mutableStateOf<Long?>(null) }
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(shape = MaterialTheme.shapes.large) {
@@ -114,16 +118,45 @@ private fun ReceiveStockDialog(
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                             modifier = Modifier.fillMaxWidth()
                         )
+                        OutlinedTextField(
+                            value = expiryDates[row.itemId]?.formatDate() ?: "",
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Expiry date (optional)") },
+                            trailingIcon = {
+                                IconButton(onClick = { datePickerForItemId = row.itemId }) {
+                                    Icon(Icons.Default.DateRange, contentDescription = "Pick expiry date")
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
                 Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
                     TextButton(onClick = onDismiss) { Text("Cancel") }
                     TextButton(onClick = {
                         val received = quantities.mapNotNull { (id, text) -> text.toDoubleOrNull()?.let { id to it } }.toMap()
-                        onConfirm(received, emptyMap())
+                        onConfirm(received, expiryDates.toMap())
                     }) { Text("Confirm Receipt") }
                 }
             }
+        }
+    }
+
+    val pickingForItemId = datePickerForItemId
+    if (pickingForItemId != null) {
+        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = expiryDates[pickingForItemId] ?: System.currentTimeMillis())
+        DatePickerDialog(
+            onDismissRequest = { datePickerForItemId = null },
+            confirmButton = {
+                TextButton(onClick = {
+                    expiryDates[pickingForItemId] = datePickerState.selectedDateMillis
+                    datePickerForItemId = null
+                }) { Text("OK") }
+            },
+            dismissButton = { TextButton(onClick = { datePickerForItemId = null }) { Text("Cancel") } }
+        ) {
+            DatePicker(state = datePickerState)
         }
     }
 }

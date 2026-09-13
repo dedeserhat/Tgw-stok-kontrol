@@ -25,7 +25,7 @@ fun StockListScreen(
     onProductClick: (Long) -> Unit,
     onAddProduct: () -> Unit
 ) {
-    LaunchedEffect(Unit) { viewModel.refreshExpiring() }
+    OnResumeEffect { viewModel.refreshExpiring() }
 
     val items by viewModel.visibleItems.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()

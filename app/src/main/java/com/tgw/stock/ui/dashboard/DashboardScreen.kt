@@ -36,6 +36,8 @@ fun DashboardScreen(
     val data by viewModel.data.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
+    OnResumeEffect { viewModel.refresh() }
+
     Scaffold(
         topBar = {
             TopAppBar(

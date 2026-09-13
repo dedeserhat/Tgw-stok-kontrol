@@ -22,7 +22,7 @@ fun RecipeListScreen(
     onAddRecipe: () -> Unit
 ) {
     val viewModel: RecipeListViewModel = tgwViewModel { RecipeListViewModel(it.recipeRepository) }
-    LaunchedEffect(Unit) { viewModel.refresh() }
+    OnResumeEffect { viewModel.refresh() }
     val summaries by viewModel.summaries.collectAsStateWithLifecycle()
 
     Scaffold(

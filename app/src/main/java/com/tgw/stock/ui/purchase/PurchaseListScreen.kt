@@ -24,7 +24,7 @@ fun PurchaseListScreen(
     onOrderCreated: (Long) -> Unit
 ) {
     val viewModel: PurchaseListViewModel = tgwViewModel { PurchaseListViewModel(it.purchaseRepository) }
-    LaunchedEffect(Unit) { viewModel.refresh() }
+    OnResumeEffect { viewModel.refresh() }
     val groups by viewModel.groups.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val createdOrderId by viewModel.createdOrderId.collectAsStateWithLifecycle()

@@ -177,15 +177,15 @@ class RoomPurchaseRepository(
                 )
             }
 
-            val newStatus = when {
+            val newStatus: String = when {
                 !anyReceived -> order.status
-                allFullyReceived -> PurchaseOrderStatus.DELIVERED
-                else -> PurchaseOrderStatus.PARTIALLY_DELIVERED
+                allFullyReceived -> PurchaseOrderStatus.DELIVERED.name
+                else -> PurchaseOrderStatus.PARTIALLY_DELIVERED.name
             }
             orderDao.update(
                 order.copy(
-                    status = newStatus.name,
-                    deliveredDate = if (newStatus == PurchaseOrderStatus.DELIVERED) System.currentTimeMillis() else order.deliveredDate
+                    status = newStatus,
+                    deliveredDate = if (newStatus == PurchaseOrderStatus.DELIVERED.name) System.currentTimeMillis() else order.deliveredDate
                 )
             )
         }
